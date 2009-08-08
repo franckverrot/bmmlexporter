@@ -1,5 +1,6 @@
 = bmmlexporter
 
+* http://bmmlexporter.rubyforge.org/
 * http://cesario.github.com/bmmlexporter
 
 == DESCRIPTION:
@@ -12,14 +13,13 @@ bmmlexporter provides an easy way to convert a bmml file to HTML or SWF.
 
 == SYNOPSIS:
 
-$:.push('bmmlexporter')
-
-require 'bmmlhtmlexporter'
+require "rubygems"
+require "bmmlexporter"
 include BmmlExporters
 
-exporter = BmmlExporters::BmmlExporter.new :import => 'file', :file => 'mu.bmml', :export_type => 'html', :export_folder => 'output/', :exporter => BmmlExporters::BmmlHtmlExport.new
-exporter.export!
-p "Export done"
+exporter = BmmlExporter.new :import => 'file', :file => "./mu.bmml", :export_type => 'html', :export_folder => 'output/', :exporter => BmmlHtmlExporter.new
+exporter.export
+
 p exporter.to_s
 
 == REQUIREMENTS:
