@@ -8,6 +8,8 @@ class TestBmmlExporter < Test::Unit::TestCase
 
 	def test_html_export
 		exporter = BmmlExporter.new :import => 'file', :file => "#{File.expand_path(File.dirname(__FILE__))}/../test/mu.bmml", :export_type => 'html', :export_folder => 'output/', :exporter => BmmlHtmlExporter.new
+		exporter.export
+		exporter.save
 		assert_not_nil exporter.to_s
 	end
 
