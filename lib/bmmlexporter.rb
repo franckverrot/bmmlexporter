@@ -54,8 +54,19 @@ module BmmlExporters
 								end
 				end
 
-				# returns type,left,top,width,height,zindex,text
 				module BmmlHelpers
+								class ControlStyle < Hash
+												def to_s
+																s = ""
+																each { |key,value|
+																				s << key+": "+value+";"
+																}
+																s
+												end
+								end
+
+								
+								# returns type,text,style
 								def BmmlHelpers.decode_control(control)
 												type = control.attributes["controlTypeID"].gsub!(/com.balsamiq.mockups::/,'').to_s.downcase
 												left = control.attributes["x"]
@@ -79,7 +90,14 @@ module BmmlExporters
 																				end
 																end if c.respond_to?(:each)
 												end
-												return type,left,top,width,height,zindex,text
+												return type,text,
+																ControlStyle.new.tap { |style|
+																style["left"] = left
+																style["top"] = top
+																style["width"] = width
+																style["height"] = height
+																style["zindex"] = zindex
+												}
 								end
 				end
 end

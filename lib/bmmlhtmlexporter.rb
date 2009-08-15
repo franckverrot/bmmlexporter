@@ -17,16 +17,6 @@ module BmmlExporters
 			@output_content = ""
 		end
 
-		class HtmlStyle < Hash
-			def to_s
-				s = ""
-				each { |key,value|
-					s << key+": "+value+";"
-				}
-				s
-			end
-		end
-
 		def set_options(*opts)
 			options = *opts
 			# :import (file,inline), :file(name.bmml), :export_type (html/flex), :export_folder('./output')
@@ -88,8 +78,6 @@ module BmmlExporters
 		end
 
 		def render_button(text,style)
-			s = HtmlStyle.new
-			s["width"] = style["width"]
 			text = "no text found" if text.nil?
 			'<button type="button" style="'+style.to_s+'">'+text+'</button>'
 		end
@@ -149,7 +137,7 @@ module BmmlExporters
 
 		$fieldset_was_already_opened = false
 		def render_fieldset(text,style)
-			myStyle = HtmlStyle.new
+			myStyle = ControlStyle.new
 			myStyle["width"] = style["width"].to_i - 20
 			myStyle["height"] = style["height"].to_i - 20
 			response = ""
@@ -348,9 +336,7 @@ module BmmlExporters
 
 
 		def render_textinput(text,style)
-			myStyle = HtmlStyle.new
-			myStyle["width"] = style["width"]
-			'<input type="text" value="'+text+'" size='+(myStyle["width"].to_i/9).to_s+'>'
+			'<input type="text" value="'+text+'" size='+(style["width"].to_i/9).to_s+'>'
 		end
 
 
@@ -461,45 +447,31 @@ module BmmlExporters
 			}
 			</style>'
 		end
-		def build_style(l, t, w, h, z)
-			HtmlStyle.new.tap { |style|
-				style["left"] = l
-				style["top"] = t
-				style["width"] = w
-				style["height"] = h
-				style["zindex"] = z
-			}
-		end
 
 		def export
-			@output_content = "<html>"
-			@output_content << "<head>" << get_head << "</head>"
-			@output_content << "<body>"
+			header = "<html>\n" << "<head>\n" << get_head << "\n</head>\n<body>"
+			body   = ""
+			footer = "\n</body>\n</html>"
 			i = 1
-			ele = 0
 			@doc.root.each_element('//control') { |control|
-				type,left,top,width,height,zindex,text = BmmlHelpers.decode_control(control)
-				style = build_style(left,top,width,height,zindex)
+				type,text,style = BmmlHelpers.decode_control(control)
 				text = format(text).url_decode
-				p i.to_s+": "+type
 
 				# if we encounter a group
 				if type.empty? or type.nil?
-					p "prout"
 					next
 				end
-				p "prouta"+type
 
-				@output_content << "<div style=\"vertical-align: middle; border: 0px black solid; background-color:"+"; position:absolute; z-index:"+zindex+';'+
-					"left:"+left+"px;"+
-					"top:"+top+"px;"+
-					"width:"+width+"px;"+
-					"height:"+height+"px;"+
-					"\">"+render(type,format(text),style)+"</div><br />\n" unless width.nil? or height.nil?
+				body << "<div style=\"vertical-align: middle; border: 0px black solid; background-color:"+"; position:absolute; z-index:"+style["zindex"]+';'+
+					"left:"+style["left"]+"px;"+
+					"top:"+style["top"]+"px;"+
+					"width:"+style["width"]+"px;"+
+					"height:"+style["height"]+"px;"+
+					"\">"+render(type,format(text),style)+"</div><br />\n" unless style["width"].nil? or style["height"].nil?
 				i += 1
 			}
 
-			@output_content += "</body></html>"
+			@output_content = header << body << footer
 		end
 
 		def save
